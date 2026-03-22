@@ -16,7 +16,7 @@ describe('classifyPhoto', () => {
     const mockCreate = jest.fn().mockResolvedValueOnce({
       content: [{ type: 'text', text: '{"keyword":"bathroom_remodeling","confidence":"high"}' }],
     })
-    ;(Anthropic as jest.Mock).mockImplementation(() => ({
+    ;(Anthropic as unknown as jest.Mock).mockImplementation(() => ({
       messages: { create: mockCreate },
     }))
 
@@ -29,7 +29,7 @@ describe('classifyPhoto', () => {
     const mockCreate = jest.fn().mockResolvedValueOnce({
       content: [{ type: 'text', text: '{"keyword":"unclear_image","confidence":"low"}' }],
     })
-    ;(Anthropic as jest.Mock).mockImplementation(() => ({
+    ;(Anthropic as unknown as jest.Mock).mockImplementation(() => ({
       messages: { create: mockCreate },
     }))
 
@@ -41,7 +41,7 @@ describe('classifyPhoto', () => {
     const mockCreate = jest.fn().mockResolvedValueOnce({
       content: [{ type: 'text', text: 'I cannot determine the work type.' }],
     })
-    ;(Anthropic as jest.Mock).mockImplementation(() => ({
+    ;(Anthropic as unknown as jest.Mock).mockImplementation(() => ({
       messages: { create: mockCreate },
     }))
 
