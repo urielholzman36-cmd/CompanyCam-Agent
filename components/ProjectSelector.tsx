@@ -4,9 +4,10 @@ import { CompanyCamProject } from '@/types'
 
 interface Props {
   onRun: (project: CompanyCamProject) => void
+  onRunAll: () => void
 }
 
-export default function ProjectSelector({ onRun }: Props) {
+export default function ProjectSelector({ onRun, onRunAll }: Props) {
   const [projects, setProjects] = useState<CompanyCamProject[]>([])
   const [selected, setSelected] = useState<string>('')
   const [loading, setLoading] = useState(true)
@@ -52,9 +53,18 @@ export default function ProjectSelector({ onRun }: Props) {
           <button
             onClick={handleRun}
             disabled={!selected}
-            className="w-full py-3 rounded-lg font-bold bg-gradient-to-r from-brand-blue to-brand-cyan text-navy-dark disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-3 rounded-lg font-bold bg-gradient-to-r from-brand-blue to-brand-cyan text-navy-dark disabled:opacity-40 disabled:cursor-not-allowed mb-4"
           >
             Run Agent 1
+          </button>
+
+          <div className="text-center text-gray-500 text-sm mb-4">— or —</div>
+
+          <button
+            onClick={onRunAll}
+            className="w-full py-3 rounded-lg font-bold bg-gradient-to-r from-brand-pink to-brand-orange text-white"
+          >
+            Fetch All Photos
           </button>
         </>
       )}

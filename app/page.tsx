@@ -21,9 +21,13 @@ export default function Home() {
             setProject(p)
             setScreen('agent1')
           }}
+          onRunAll={() => {
+            setProject(null)
+            setScreen('agent1')
+          }}
         />
       )}
-      {screen === 'agent1' && project && (
+      {screen === 'agent1' && (
         <Agent1Progress
           project={project}
           onComplete={(photos) => {
@@ -35,7 +39,7 @@ export default function Home() {
       {screen === 'review' && (
         <ManualReview
           photos={processedPhotos}
-          projectName={project?.name ?? ''}
+          projectName={project?.name ?? 'All Photos'}
           onGenerate={(selected) => {
             setSelectedForAgent2(selected)
             setScreen('agent2')
@@ -51,7 +55,7 @@ export default function Home() {
       {screen === 'summary' && (
         <Summary
           photos={processedPhotos}
-          projectName={project?.name ?? ''}
+          projectName={project?.name ?? 'All Photos'}
         />
       )}
     </div>
