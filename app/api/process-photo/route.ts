@@ -10,14 +10,17 @@ import {
   uploadFile,
   getFolderWebViewLink,
 } from '@/lib/google-drive'
+import { reverseGeocode } from '@/lib/geocode'
 
 export async function POST(req: NextRequest) {
   try {
-    const { photoId, photoUrl, projectName, city } = await req.json()
+    const { photoId, photoUrl, projectName, city: providedCity, lat, lon } = await req.json()
 
-    if (!photoUrl || !projectName || !city) {
+    if (!photoUrl || !projectName) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
+
+    const city = providedCity || (lat != null && lon != null ? await reverseGeocode(lat, lon) : 'Unknown')
 
     // 1. Classify photo with Claude Vision
     const { keyword, confidence } = await classifyPhoto(photoUrl)
