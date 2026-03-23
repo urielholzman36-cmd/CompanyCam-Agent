@@ -45,3 +45,26 @@ export async function fetchProject(projectId: string): Promise<CompanyCamProject
   const response = await axios.get(`${BASE}/projects/${projectId}`, { headers: headers() })
   return response.data
 }
+
+export async function fetchAllPhotos(): Promise<CompanyCamPhoto[]> {
+  const photos: CompanyCamPhoto[] = []
+  let page = 1
+
+  while (true) {
+    const response = await axios.get(`${BASE}/photos?per_page=100&page=${page}`, { headers: headers() })
+    const batch: CompanyCamPhoto[] = response.data
+    if (batch.length === 0) break
+    photos.push(...batch)
+    page++
+  }
+
+  return photos
+}
+
+export function getPhotoUrl(photo: CompanyCamPhoto): string {
+  const original = photo.uris.find((u) => u.type === 'original')
+  const web = photo.uris.find((u) => u.type === 'web')
+  const any = photo.uris[0]
+  const chosen = original || web || any
+  return chosen?.uri || chosen?.url || ''
+}
