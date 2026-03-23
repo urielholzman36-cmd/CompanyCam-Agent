@@ -1,10 +1,10 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { CompanyCamProject, CompanyCamPhoto, ProcessedPhoto } from '@/types'
-import { extractCity } from '@/lib/companycam'
+import { getPhotoUrl } from '@/lib/companycam'
 
 interface Props {
-  project: CompanyCamProject
+  project: CompanyCamProject | null
   onComplete: (photos: ProcessedPhoto[]) => void
 }
 
@@ -15,19 +15,18 @@ export default function Agent1Progress({ project, onComplete }: Props) {
   const [loaded, setLoaded] = useState(false)
   const ranRef = useRef(false)
 
-  const city = extractCity(project.address)
-
   useEffect(() => {
     if (ranRef.current) return
     ranRef.current = true
 
-    fetch(`/api/projects/${project.id}/photos`)
+    const url = project ? `/api/projects/${project.id}/photos` : '/api/photos'
+    fetch(url)
       .then((r) => r.json())
       .then((data: CompanyCamPhoto[]) => {
         setPhotos(data)
         setLoaded(true)
       })
-  }, [project.id])
+  }, [project])
 
   useEffect(() => {
     if (!loaded || photos.length === 0) return
@@ -43,6 +42,9 @@ export default function Agent1Progress({ project, onComplete }: Props) {
 
     setCurrentIndex(index)
     const photo = photos[index]
+    const photoUrl = getPhotoUrl(photo)
+    const coord = photo.coordinates?.[0]
+    const projectName = project?.name ?? 'All Photos'
 
     try {
       const res = await fetch('/api/process-photo', {
@@ -50,17 +52,18 @@ export default function Agent1Progress({ project, onComplete }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           photoId: photo.id,
-          photoUrl: photo.uri,
-          projectName: project.name,
-          city,
+          photoUrl,
+          projectName,
+          lat: coord?.lat,
+          lon: coord?.lon,
         }),
       })
       const data = await res.json()
       const processed: ProcessedPhoto = res.ok
-        ? { ...data, originalUrl: photo.uri, status: 'done' }
+        ? { ...data, originalUrl: photoUrl, status: 'done' }
         : {
-            id: photo.id, originalUrl: photo.uri, keyword: 'error', confidence: 'low',
-            city, filename: '', driveFileId: '', driveFolderId: '', driveFolderUrl: '',
+            id: photo.id, originalUrl: photoUrl, keyword: 'error', confidence: 'low',
+            city: 'Unknown', filename: '', driveFileId: '', driveFolderId: '', driveFolderUrl: '',
             projectFolderId: '', projectFolderUrl: '', status: 'failed', error: data.error,
           }
 
@@ -69,8 +72,8 @@ export default function Agent1Progress({ project, onComplete }: Props) {
       processNext(index + 1, next)
     } catch {
       const failed: ProcessedPhoto = {
-        id: photo.id, originalUrl: photo.uri, keyword: 'error', confidence: 'low',
-        city, filename: '', driveFileId: '', driveFolderId: '', driveFolderUrl: '',
+        id: photo.id, originalUrl: photoUrl, keyword: 'error', confidence: 'low',
+        city: 'Unknown', filename: '', driveFileId: '', driveFolderId: '', driveFolderUrl: '',
         projectFolderId: '', projectFolderUrl: '', status: 'failed', error: 'Network error',
       }
       const next = [...accumulated, failed]
@@ -86,7 +89,7 @@ export default function Agent1Progress({ project, onComplete }: Props) {
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold mb-1">Agent 1 — Processing Photos</h1>
-      <p className="text-gray-400 text-sm mb-6">{project.name}</p>
+      <p className="text-gray-400 text-sm mb-6">{project?.name ?? 'All Photos'}</p>
 
       <div className="bg-navy rounded-lg h-2 mb-6">
         <div
