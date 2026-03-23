@@ -11,7 +11,8 @@ export interface CompanyCamProject {
 
 export interface CompanyCamPhoto {
   id: string
-  uri: string // direct download URL
+  coordinates: { lat: number; lon: number }[]
+  uris: { type: string; uri: string; url?: string }[]
 }
 
 export type PhotoStatus = 'pending' | 'processing' | 'done' | 'failed'
